@@ -1,22 +1,28 @@
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal
-from textual.widgets import Label, ListItem, ListView
+from textual.containers import Horizontal, Vertical
+from textual.widgets import Button, Input, Label
+
+from tui.settings import SettingsPage
 
 
 class MediaRenamer(App):
-	def compose(self) -> ComposeResult:
-		with Horizontal():
-			yield Label("AI Media Renamer PRO X 10+ (Lite)")
-		yield ListView(
-			ListItem(Label("Process Images"), id="process-images"),
-			ListItem(Label("Process Videos"), id="process-videos"),
-			ListItem(Label("Process Both"), id="process-both"),
-			ListItem(Label("Settings"), id="settings"),
-		)
+    working_dir: str = ""
 
-	def on_list_view_selected(self, event: ListView.Selected) -> None:
-		self.log(f"Selected: {event.item.id}")
+    def compose(self) -> ComposeResult:
+        with Vertical():
+            with Horizontal():
+                yield Label("AI Media Renamer PRO X 10+ (Lite)")
+            with Horizontal():
+                yield Input(placeholder="Enter scan directory")
+            with Horizontal():
+                yield Button("Confirm", id="confirm")
+
+    def on_input_submitted(self, event: Input.Submitted):
+        self.dir = event.value
+
+    def on_button_pressed(self, event: Button.Pressed):
+        self.app.push_screen(SettingsPage(scan_dir=self.working_dir))
 
 
 if __name__ == "__main__":
-	MediaRenamer().run()
+    MediaRenamer().run()
