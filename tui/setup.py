@@ -1,4 +1,4 @@
-from dotenv import set_key
+from dotenv import set_key, get_key
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -16,18 +16,32 @@ class TopBar(Horizontal):
 		yield title
 
 
+class KeyInput(Horizontal):
+	def compose(self) -> ComposeResult:
+		input_widget = Input(placeholder="Enter API key", id="openrouter_key", compact=True)
+		input_widget.styles.width = 50
+
+		key: str = str(get_key(".env", "OPENROUTER_KEY")) if get_key(".env", "OPENROUTER_KEY") is not None else ""
+		input_widget.value = key
+		yield Label("Openrouter (Cloud): ")
+		yield input_widget
+
+
+class PortInput(Horizontal):
+	def compose(self) -> ComposeResult:
+		input_widget = Input(placeholder="Enter Port Number", id="ollama_port", compact=True)
+		input_widget.styles.width = 50
+
+		port: str = str(get_key(".env", "OLLAMA_PORT")) if get_key(".env", "OLLAMA_PORT") is not None else ""
+		input_widget.value = port
+		yield Label("Ollama (Local): ")
+		yield input_widget
+
+
 class Inputs(Vertical):
 	def compose(self) -> ComposeResult:
-		with Horizontal():
-			input_widget = Input(placeholder="Enter API key", id="openrouter_key", compact=True)
-			input_widget.styles.width = 50
-			yield Label("Openrouter (Cloud): ")
-			yield input_widget
-		with Horizontal():
-			input_widget = Input(placeholder="Enter Port Number", id="ollama_port", compact=True)
-			input_widget.styles.width = 50
-			yield Label("Ollama (Local): ")
-			yield input_widget
+		yield KeyInput()
+		yield PortInput()
 
 
 class SetupPage(Screen):
