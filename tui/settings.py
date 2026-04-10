@@ -1,5 +1,6 @@
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
+from textual.message import Message
 from textual.widgets import Button, Label, Input, TextArea
 
 
@@ -9,7 +10,9 @@ class ScanDir(Vertical):
 		yield Label("Scan Directory")
 		with Horizontal() as row:
 			row.styles.height = "auto"
-			yield Input("e.g. C:/Users/Steve/Pictures")
+			input = Input(placeholder="e.g. C:/Users/Steve/Pictures", id="dir_input")
+			input.styles.width = "1fr"
+			yield input
 			yield Button("Scan", id="find_files")
 
 
@@ -50,6 +53,14 @@ class ModelConfig(Vertical):
 
 
 class Settings(Vertical):
+	class DirSet(Message):
+		def __init__(self, dir: str, allow_images: bool, allow_videos: bool):
+			super().__init__()
+			self.dir = dir
+			self.allow_images = allow_images
+			self.allow_videos = allow_videos
+
+
 	working_dir: str = ""
 	images: list[str] = []
 	videos: list[str] = []
@@ -72,7 +83,8 @@ class Settings(Vertical):
 
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "find_files":
-			pass
+			set_dir: str = self.query_one("#dir_input", Input).value
+			self.post_message(self.DirSet(set_dir, self.include_images, self.include_videos))
 
 		elif event.button.id == "include_images":
 			self.include_images = not self.include_images

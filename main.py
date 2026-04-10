@@ -3,11 +3,13 @@ from dotenv import load_dotenv
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import Button, Input, Label, Static
+from textual.widgets import Button, Label, Static
+from textual.message import Message
 
 from tui.settings import Settings
 from tui.setup import SetupPage
 from tui.files import Files
+from utils.get_data import scan_dir
 
 
 class TopBar(Horizontal):
@@ -49,6 +51,10 @@ class MediaRenamer(App):
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "back":
 			self.app.push_screen(SetupPage())
+	
+	def on_settings_dir_set(self, event: Settings.DirSet) -> None:
+		images, videos = scan_dir(event.dir, event.allow_images, event.allow_videos)
+		self.query_one(Files).set_files(images, videos)
 
 
 if __name__ == "__main__":
