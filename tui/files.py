@@ -22,6 +22,9 @@ class ImageSection(Vertical):
 		img_label.styles.text_style = "bold"
 		yield img_label
 
+		img_list = VerticalScroll(id="img_list")
+		yield img_list
+
 
 class VideoSection(Vertical):
 	def compose(self) -> ComposeResult:
@@ -29,20 +32,23 @@ class VideoSection(Vertical):
 		vid_label.styles.text_style = "bold"
 		yield vid_label
 
+		vid_list = VerticalScroll(id="vid_list")
+		yield vid_list
+
 
 class Files(Vertical):
 	def compose(self) -> ComposeResult:
 		yield ImageSection(id="image_section")
 		yield VideoSection(id="video_section")
-	
+
 	def set_files(self, images: list[str], videos: list[str]):
-		image_section = self.query_one("#image_section", Vertical)
-		video_section = self.query_one("#video_section", Vertical)
-		
-		image_section.query(ListItem).remove()
-		video_section.query(ListItem).remove()
-		
+		img_list = self.query_one("#img_list", VerticalScroll)
+		vid_list = self.query_one("#vid_list", VerticalScroll)
+
+		img_list.query(ListItem).remove()
+		vid_list.query(ListItem).remove()
+
 		for image in images:
-			image_section.mount(ListItem(Path(image).name))
+			img_list.mount(ListItem(Path(image).name))
 		for video in videos:
-			video_section.mount(ListItem(Path(video).name))
+			vid_list.mount(ListItem(Path(video).name))
