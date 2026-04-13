@@ -2,6 +2,7 @@ from pathlib import Path
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.css.query import NoMatches
 from textual.widgets import Button, Collapsible, Label
 
 
@@ -38,15 +39,19 @@ class VideoSection(Vertical):
 
 class Files(Vertical):
 	def compose(self) -> ComposeResult:
+		new_names_button = Button("New Names", compact=True, id="get_new_names")
+		new_names_button.styles.dock = "right"
+		yield new_names_button
+		
 		yield ImageSection(id="image_section")
 		yield VideoSection(id="video_section")
 
-	def set_files(self, images: list[str], videos: list[str]) -> None:
+	async def set_files(self, images: list[str], videos: list[str]) -> None:
 		img_section = self.query_one("#image_section", Vertical)
 		vid_section = self.query_one("#video_section", Vertical)
 
-		img_section.query("VerticalScroll").remove()
-		vid_section.query("VerticalScroll").remove()
+		await img_section.query("VerticalScroll").remove()
+		await vid_section.query("VerticalScroll").remove()
 
 		img_names: list[ListItem] = []
 		vid_names: list[ListItem] = []

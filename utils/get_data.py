@@ -24,3 +24,8 @@ def scan_dir(dir: str, allow_images: bool, allow_videos: bool) -> tuple[list[str
 		for dir in dirs:
 			scan_dir(os.path.join(root, dir), allow_images, allow_videos)
 	return images, videos
+
+
+def rename_files(file_paths: dict[str, str]) -> None:
+	for key in file_paths:
+		os.rename(key, file_paths[key])

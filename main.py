@@ -51,10 +51,13 @@ class MediaRenamer(App):
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "back":
 			self.app.push_screen(SetupPage())
+		
+		if event.button.id == "get_new_names":
+			pass
 	
-	def on_settings_dir_set(self, event: Settings.DirSet) -> None:
+	async def on_settings_dir_set(self, event: Settings.DirSet) -> None:
 		images, videos = scan_dir(event.dir, event.allow_images, event.allow_videos)
-		self.query_one(Files).set_files(images, videos)
+		await self.query_one(Files).set_files(images, videos)
 
 
 if __name__ == "__main__":
