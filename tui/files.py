@@ -6,14 +6,20 @@ from textual.widgets import Button, Collapsible, Label
 
 
 class ListItem(Horizontal):
-	def __init__(self, old_name: str):
+	path: str = ""
+	old_name: str = ""
+	new_name: str = "NEW NAME"
+
+	def __init__(self, path: str, old_name: str):
 		super().__init__()
+		self.path = path
 		self.old_name = old_name
 
 	def compose(self) -> ComposeResult:
+		self.styles.height = "auto"
 		yield Label(self.old_name)
-		yield Label("==")
-		yield Label("NEW NAME")
+		yield Label("->")
+		yield Label(self.new_name)
 
 
 class ImageSection(Vertical):
@@ -22,9 +28,6 @@ class ImageSection(Vertical):
 		img_label.styles.text_style = "bold"
 		yield img_label
 
-		img_list = VerticalScroll(id="img_list")
-		yield img_list
-
 
 class VideoSection(Vertical):
 	def compose(self) -> ComposeResult:
@@ -32,23 +35,29 @@ class VideoSection(Vertical):
 		vid_label.styles.text_style = "bold"
 		yield vid_label
 
-		vid_list = VerticalScroll(id="vid_list")
-		yield vid_list
-
 
 class Files(Vertical):
 	def compose(self) -> ComposeResult:
 		yield ImageSection(id="image_section")
 		yield VideoSection(id="video_section")
 
-	def set_files(self, images: list[str], videos: list[str]):
-		img_list = self.query_one("#img_list", VerticalScroll)
-		vid_list = self.query_one("#vid_list", VerticalScroll)
+	def set_files(self, images: list[str], videos: list[str]) -> None:
+		img_section = self.query_one("#image_section", Vertical)
+		vid_section = self.query_one("#video_section", Vertical)
 
-		img_list.query(ListItem).remove()
-		vid_list.query(ListItem).remove()
+		img_section.query("VerticalScroll").remove()
+		vid_section.query("VerticalScroll").remove()
 
-		for image in images:
-			img_list.mount(ListItem(Path(image).name))
-		for video in videos:
-			vid_list.mount(ListItem(Path(video).name))
+		img_names: list[ListItem] = []
+		vid_names: list[ListItem] = []
+
+		for img in images:
+			img_names.append(ListItem(img, Path(img).name))
+		for vid in videos:
+			vid_names.append(ListItem(vid, Path(vid).name))
+
+		img_list = VerticalScroll(*img_names, id="img_list")
+		vid_list = VerticalScroll(*vid_names, id="vid_list")
+
+		img_section.mount(img_list)
+		vid_section.mount(vid_list)
