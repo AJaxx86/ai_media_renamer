@@ -59,15 +59,19 @@ class Settings(Vertical):
 			self.dir = dir
 			self.allow_images = allow_images
 			self.allow_videos = allow_videos
-
-
-	working_dir: str = ""
-	images: list[str] = []
-	videos: list[str] = []
+	
+	class GetNewNames(Message):
+		def __init__(self) -> None:
+			super().__init__()
+			self.get_names = True
+	
+	class RenameFiles(Message):
+		def __init__(self) -> None:
+			super().__init__()
+			self.rename_files = True
 
 	include_images: bool = False
 	include_videos: bool = True
-
 	cloud_model: bool = True
 
 	def compose(self) -> ComposeResult:
@@ -77,14 +81,25 @@ class Settings(Vertical):
 
 		with Horizontal() as row:
 			row.styles.align = ("center", "middle")
-			start_button = Button("Start Analyses", id="start_analyses")
-			start_button.styles.align
-			yield start_button
+			get_names = Button("Start Analyses", id="start_analyses")
+			get_names.styles.margin = (0, 1)
+			yield get_names
+			
+			rename_files = Button("Confirm Rename", id="start_rename")
+			rename_files.styles.margin = (0, 1)
+			yield rename_files
+			
 
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "find_files":
 			set_dir: str = self.query_one("#dir_input", Input).value
 			self.post_message(self.DirSet(set_dir, self.include_images, self.include_videos))
+
+		if event.button.id == "start_analyses":
+			self.post_message(self.GetNewNames())
+		
+		if event.button.id == "start_rename":
+			self.post_message(self.RenameFiles())
 
 		elif event.button.id == "include_images":
 			self.include_images = not self.include_images

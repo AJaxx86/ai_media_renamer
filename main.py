@@ -9,7 +9,7 @@ from textual.message import Message
 from tui.settings import Settings
 from tui.setup import SetupPage
 from tui.files import Files
-from utils.get_data import scan_dir
+from utils.file_manager import scan_dir
 
 
 class TopBar(Horizontal):
@@ -36,6 +36,8 @@ class TopBar(Horizontal):
 class MediaRenamer(App):
 	load_dotenv()
 	openrouter_key, ollama_port = os.getenv("OPENROUTER_KEY"), os.getenv("OLLAMA_PORT")
+	image_paths: list[str] = []
+	video_paths: list[str] = []
 
 	def compose(self) -> ComposeResult:
 		with Vertical():
@@ -51,13 +53,16 @@ class MediaRenamer(App):
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "back":
 			self.app.push_screen(SetupPage())
-		
-		if event.button.id == "get_new_names":
-			pass
-	
+
 	async def on_settings_dir_set(self, event: Settings.DirSet) -> None:
-		images, videos = scan_dir(event.dir, event.allow_images, event.allow_videos)
-		await self.query_one(Files).set_files(images, videos)
+		self.image_paths, self.video_paths = scan_dir(event.dir, event.allow_images, event.allow_videos)
+		await self.query_one(Files).set_files(self.image_paths, self.video_paths)
+
+	async def on_settings_get_new_names(self, event: Settings.GetNewNames) -> None:
+		pass
+
+	async def on_settings_rename_files(self, event: Settings.RenameFiles) -> None:
+		pass
 
 
 if __name__ == "__main__":

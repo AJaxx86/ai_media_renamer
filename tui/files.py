@@ -4,6 +4,7 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.css.query import NoMatches
 from textual.widgets import Button, Collapsible, Label
+from textual.message import Message
 
 
 class ListItem(Horizontal):
@@ -20,7 +21,7 @@ class ListItem(Horizontal):
 		self.styles.height = "auto"
 		yield Label(self.old_name)
 		yield Label("->")
-		yield Label(self.new_name)
+		yield Label(self.new_name, id="new_file_name")
 
 
 class ImageSection(Vertical):
@@ -39,12 +40,12 @@ class VideoSection(Vertical):
 
 class Files(Vertical):
 	def compose(self) -> ComposeResult:
-		new_names_button = Button("New Names", compact=True, id="get_new_names")
-		new_names_button.styles.dock = "right"
-		yield new_names_button
-		
 		yield ImageSection(id="image_section")
 		yield VideoSection(id="video_section")
+	
+	def on_button_pressed(self, event: Button.Pressed) -> None:
+		if event.button.id == "get_new_names":
+			self.post_message(Message())
 
 	async def set_files(self, images: list[str], videos: list[str]) -> None:
 		img_section = self.query_one("#image_section", Vertical)
