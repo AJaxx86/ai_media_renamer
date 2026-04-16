@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import asyncio
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -10,6 +11,7 @@ from tui.settings import Settings
 from tui.setup import SetupPage
 from tui.files import Files
 from utils.file_manager import scan_dir
+from utils.api_manager import get_new_name
 
 
 class TopBar(Horizontal):
@@ -59,7 +61,18 @@ class MediaRenamer(App):
 		await self.query_one(Files).set_files(self.image_paths, self.video_paths)
 
 	async def on_settings_get_new_names(self, event: Settings.GetNewNames) -> None:
-		pass
+		async def fetch_and_update(path: str) -> None:
+			item = self.query_one(Files).list_item_paths.get(path)
+			if not item:
+				self.notify(f"Could not find item for path: {path}", timeout=3)
+				return
+			new_name_label = item.query_one("#new_file_name", Label)
+			new_name_label.update("...")
+			new_name = await get_new_name(path)
+			new_name_label.update(new_name)
+
+		for path in self.image_paths + self.video_paths:
+			asyncio.create_task(fetch_and_update(path))
 
 	async def on_settings_rename_files(self, event: Settings.RenameFiles) -> None:
 		pass

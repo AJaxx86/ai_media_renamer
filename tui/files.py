@@ -8,13 +8,11 @@ from textual.message import Message
 
 
 class ListItem(Horizontal):
-	path: str = ""
 	old_name: str = ""
-	new_name: str = "NEW NAME"
+	new_name: str = ""
 
-	def __init__(self, path: str, old_name: str):
+	def __init__(self, old_name: str):
 		super().__init__()
-		self.path = path
 		self.old_name = old_name
 
 	def compose(self) -> ComposeResult:
@@ -39,10 +37,14 @@ class VideoSection(Vertical):
 
 
 class Files(Vertical):
+	def __init__(self):
+		super().__init__()
+		self.list_item_paths: dict[str, ListItem] = {}
+
 	def compose(self) -> ComposeResult:
 		yield ImageSection(id="image_section")
 		yield VideoSection(id="video_section")
-	
+
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "get_new_names":
 			self.post_message(Message())
@@ -53,14 +55,19 @@ class Files(Vertical):
 
 		await img_section.query("VerticalScroll").remove()
 		await vid_section.query("VerticalScroll").remove()
+		self.list_item_paths.clear()
 
 		img_names: list[ListItem] = []
 		vid_names: list[ListItem] = []
 
 		for img in images:
-			img_names.append(ListItem(img, Path(img).name))
+			img_item = ListItem(Path(img).name)
+			self.list_item_paths[img] = img_item
+			img_names.append(img_item)
 		for vid in videos:
-			vid_names.append(ListItem(vid, Path(vid).name))
+			vid_item = ListItem(Path(vid).name)
+			self.list_item_paths[vid] = vid_item
+			vid_names.append(vid_item)
 
 		img_list = VerticalScroll(*img_names, id="img_list")
 		vid_list = VerticalScroll(*vid_names, id="vid_list")
