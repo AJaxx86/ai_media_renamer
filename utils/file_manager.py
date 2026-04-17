@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 image_whitelist: list[str] = [
 	".jpg",
@@ -29,3 +30,8 @@ def scan_dir(dir: str, allow_images: bool, allow_videos: bool) -> tuple[list[str
 def rename_files(file_paths: dict[str, str]) -> None:
 	for key in file_paths:
 		os.rename(key, file_paths[key])
+
+
+def check_ffmpeg() -> bool:
+	result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
+	return result.returncode == 0

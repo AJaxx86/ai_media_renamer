@@ -33,6 +33,9 @@ class Include(Vertical):
 			yield Button("( ) Images", id="include_images")
 			yield Button("(X) Videos", id="include_videos")
 
+			clip_length_input = Input(placeholder="Clip length in seconds", id="clip_length")
+			clip_length_input.styles.width = "1fr"
+			yield clip_length_input
 
 class ModelConfig(Vertical):
 	def compose(self) -> ComposeResult:
@@ -59,12 +62,12 @@ class Settings(Vertical):
 			self.dir = dir
 			self.allow_images = allow_images
 			self.allow_videos = allow_videos
-	
+
 	class GetNewNames(Message):
-		def __init__(self) -> None:
+		def __init__(self, target_clip_length: str) -> None:
 			super().__init__()
-			self.get_names = True
-	
+			self.clip_length = target_clip_length
+
 	class RenameFiles(Message):
 		def __init__(self) -> None:
 			super().__init__()
@@ -84,11 +87,11 @@ class Settings(Vertical):
 			get_names = Button("Start Analyses", id="start_analyses")
 			get_names.styles.margin = (0, 1)
 			yield get_names
-			
+
 			rename_files = Button("Confirm Rename", id="start_rename")
 			rename_files.styles.margin = (0, 1)
 			yield rename_files
-			
+
 
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "find_files":
@@ -96,8 +99,9 @@ class Settings(Vertical):
 			self.post_message(self.DirSet(set_dir, self.include_images, self.include_videos))
 
 		if event.button.id == "start_analyses":
-			self.post_message(self.GetNewNames())
-		
+			target_clip_length = self.query_one("#clip_length", Input).value
+			self.post_message(self.GetNewNames(target_clip_length if target_clip_length else "60"))
+
 		if event.button.id == "start_rename":
 			self.post_message(self.RenameFiles())
 

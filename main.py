@@ -1,3 +1,8 @@
+# TODO
+# [ ] new screen for AI model config, local and cloud with ECO, BALANCED, EXPENSIVE using gemini models and CUSTOM (ADD DISCLAIMER REQUIRING VISION MODELS)
+# [ ] API call constructor for api_manager, check if it's an image or a video first
+
+
 import os
 from dotenv import load_dotenv
 import asyncio
@@ -5,12 +10,11 @@ import asyncio
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, Label, Static
-from textual.message import Message
 
 from tui.settings import Settings
 from tui.setup import SetupPage
 from tui.files import Files
-from utils.file_manager import scan_dir
+from utils.file_manager import scan_dir, check_ffmpeg
 from utils.api_manager import get_new_name
 
 
@@ -68,9 +72,14 @@ class MediaRenamer(App):
 				return
 			new_name_label = item.query_one("#new_file_name", Label)
 			new_name_label.update("...")
-			new_name = await get_new_name(path)
+			new_name = await get_new_name(path, event.clip_length)
 			new_name_label.update(new_name)
-
+		
+		include_videos: bool = self.query_one(Settings).include_videos
+		if not check_ffmpeg() and include_videos:
+			self.app.notify("FFMPEG not found. Please make sure FFMPEG is installed to rename videos.", severity="warning")
+			return
+		
 		for path in self.image_paths + self.video_paths:
 			asyncio.create_task(fetch_and_update(path))
 

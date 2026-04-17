@@ -1,1 +1,1 @@
-# ai_media_renamer
+# AI Media Renamer

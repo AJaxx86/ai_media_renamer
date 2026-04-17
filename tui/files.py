@@ -2,8 +2,7 @@ from pathlib import Path
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
-from textual.css.query import NoMatches
-from textual.widgets import Button, Collapsible, Label
+from textual.widgets import Button, Label
 from textual.message import Message
 
 
