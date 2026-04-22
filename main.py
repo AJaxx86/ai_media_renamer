@@ -1,10 +1,11 @@
 # TODO
 # [ ] new screen for AI model config, local and cloud with ECO, BALANCED, EXPENSIVE using gemini models and CUSTOM (ADD DISCLAIMER REQUIRING VISION MODELS)
-# [ ] API call constructor for api_manager, check if it's an image or a video first
+# [ ] change the new name label to an input so the user can edit the name before renaming
 
 from dotenv import load_dotenv
 import os
 import asyncio
+import shutil
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -67,6 +68,10 @@ class MediaRenamer(App):
 		await self.query_one(Files).set_files(self.image_paths, self.video_paths)
 
 	async def on_settings_get_new_names(self, event: Settings.GetNewNames) -> None:
+		shutil.rmtree("tmp", ignore_errors=True)
+		os.makedirs("tmp", exist_ok=True)
+		sem = asyncio.Semaphore(2)
+
 		async def fetch_and_update(path: str) -> None:
 			item = self.query_one(Files).list_item_paths.get(path)
 			if not item:
@@ -74,7 +79,8 @@ class MediaRenamer(App):
 				return
 			new_name_label = item.query_one("#new_file_name", Label)
 			new_name_label.update("...")
-			new_name = await get_new_name(path, event.clip_length)
+			async with sem:
+				new_name = await get_new_name(path, event.clip_length)
 			new_name_label.update(new_name)
 
 		include_videos: bool = self.query_one(Settings).include_videos
@@ -82,8 +88,8 @@ class MediaRenamer(App):
 			self.app.notify("FFMPEG not found. Please make sure FFMPEG is installed to rename videos.", severity="warning")
 			return
 
-		for path in self.image_paths + self.video_paths:
-			asyncio.create_task(fetch_and_update(path))
+		self.app.notify("Starting analyses, this may take some time.", timeout=3)
+		await asyncio.gather(*[fetch_and_update(path) for path in self.image_paths + self.video_paths])
 
 	async def on_settings_rename_files(self, event: Settings.RenameFiles) -> None:
 		pass

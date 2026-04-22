@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.containers import Horizontal, Vertical, ScrollableContainer
 from textual.widgets import Button, Label
 from textual.message import Message
 
@@ -16,6 +16,7 @@ class ListItem(Horizontal):
 
 	def compose(self) -> ComposeResult:
 		self.styles.height = "auto"
+		self.styles.width = "auto"
 		yield Label(self.old_name)
 		yield Label("->")
 		yield Label(self.new_name, id="new_file_name")
@@ -68,8 +69,8 @@ class Files(Vertical):
 			self.list_item_paths[vid] = vid_item
 			vid_names.append(vid_item)
 
-		img_list = VerticalScroll(*img_names, id="img_list")
-		vid_list = VerticalScroll(*vid_names, id="vid_list")
+		img_list = ScrollableContainer(*img_names, id="img_list")
+		vid_list = ScrollableContainer(*vid_names, id="vid_list")
 
 		img_section.mount(img_list)
 		vid_section.mount(vid_list)
