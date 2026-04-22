@@ -1,5 +1,6 @@
-from openai import OpenAI
+from openai import AsyncOpenAI
 from pathlib import Path
+from .file_manager import image_whitelist
 import subprocess
 import os
 import base64
@@ -7,8 +8,55 @@ import base64
 clip_dir: str = "tmp/"
 
 
-async def get_new_name(file_path: str, target_clip_length: str) -> str:
-	return "NEW_NAME"
+async def get_new_name(file_path: str, target_clip_length: str, extra_context: str = "") -> str:
+	client = AsyncOpenAI(
+		base_url="https://openrouter.ai/api/v1",
+		api_key=os.getenv("OPENROUTER_KEY")
+	)
+	
+	selected_model: str = "google/gemini-3-flash-preview"
+	file_name: str = Path(file_path).stem
+	file_type: str = Path(file_path).suffix
+	is_image: bool = file_type in image_whitelist
+	
+	system_prompt: str = f"""
+	Rename this {'image' if is_image else 'video'}. The current name is {file_name}.
+	Respond with nothing but the new name, that means no explanation, no file extension, etc.
+	"""
+	messages: list = [{
+		"role": "system",
+		"content": [
+			{"type": "text", "text": system_prompt}
+		]
+	}]
+	
+	if extra_context:
+		messages.append({
+			"type": "text",
+			"text": f"User provided context: {extra_context}"
+		})
+	
+	if is_image:
+		messages.append({
+			"role": "user",
+			"content": [
+				{"type": "image_url", "image_url": {"url": f"data:image/{file_type};base64,{encode_base64(file_path)}"}}
+			]
+		})
+	else:
+		messages.append({
+			"role": "user",
+			"content": [
+				{"type": "video_url", "video_url": {"url": f"data:video/{file_type};base64,{encode_base64(file_path)}"}}
+			]
+		})
+	
+	response = await client.chat.completions.create(
+		model=selected_model,
+		messages=messages
+	)
+	
+	return (response.choices[0].message.content or "").strip()
 
 
 def encode_base64(path) -> str:

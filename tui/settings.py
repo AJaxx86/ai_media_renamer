@@ -49,7 +49,7 @@ class ModelConfig(Vertical):
 		with Horizontal() as row:
 			row.styles.height = "auto"
 			model_type = Button("Cloud", id="model_type")
-			model_type.styles.color = "green"
+			model_type.styles.color = "aqua"
 			model_type.styles.margin = (0, 3, 0, 0)
 			yield model_type
 			yield Button("Configure", id="model_config")

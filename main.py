@@ -2,9 +2,8 @@
 # [ ] new screen for AI model config, local and cloud with ECO, BALANCED, EXPENSIVE using gemini models and CUSTOM (ADD DISCLAIMER REQUIRING VISION MODELS)
 # [ ] API call constructor for api_manager, check if it's an image or a video first
 
-
-import os
 from dotenv import load_dotenv
+import os
 import asyncio
 
 from textual.app import App, ComposeResult
@@ -17,6 +16,7 @@ from tui.files import Files
 from utils.file_manager import scan_dir, check_ffmpeg
 from utils.api_manager import get_new_name
 
+load_dotenv()
 
 class TopBar(Horizontal):
 	def compose(self) -> ComposeResult:
@@ -40,7 +40,6 @@ class TopBar(Horizontal):
 
 
 class MediaRenamer(App):
-	load_dotenv()
 	openrouter_key, ollama_port = os.getenv("OPENROUTER_KEY"), os.getenv("OLLAMA_PORT")
 	image_paths: list[str] = []
 	video_paths: list[str] = []
@@ -62,6 +61,9 @@ class MediaRenamer(App):
 
 	async def on_settings_dir_set(self, event: Settings.DirSet) -> None:
 		self.image_paths, self.video_paths = scan_dir(event.dir, event.allow_images, event.allow_videos)
+		if len(self.image_paths) == 0 and len(self.video_paths) == 0:
+			self.notify("No images or videos found in the selected directory.", timeout=3, severity="warning")
+			return
 		await self.query_one(Files).set_files(self.image_paths, self.video_paths)
 
 	async def on_settings_get_new_names(self, event: Settings.GetNewNames) -> None:
@@ -74,12 +76,12 @@ class MediaRenamer(App):
 			new_name_label.update("...")
 			new_name = await get_new_name(path, event.clip_length)
 			new_name_label.update(new_name)
-		
+
 		include_videos: bool = self.query_one(Settings).include_videos
 		if not check_ffmpeg() and include_videos:
 			self.app.notify("FFMPEG not found. Please make sure FFMPEG is installed to rename videos.", severity="warning")
 			return
-		
+
 		for path in self.image_paths + self.video_paths:
 			asyncio.create_task(fetch_and_update(path))
 
