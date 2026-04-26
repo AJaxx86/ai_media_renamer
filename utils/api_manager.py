@@ -23,6 +23,7 @@ async def get_new_name(file_path: str, target_clip_length: str, extra_context: s
 	system_prompt: str = f"""
 	Rename this {'image' if is_image else 'video'}. The current name is {file_name}.
 	Respond with nothing but the new name, that means no explanation, no file extension, etc.
+	Do not use a full stop at the end of the name.
 	"""
 	messages: list = [{
 		"role": "system",

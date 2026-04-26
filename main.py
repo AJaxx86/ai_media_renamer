@@ -1,6 +1,5 @@
 # TODO
 # [ ] new screen for AI model config, local and cloud with ECO, BALANCED, EXPENSIVE using gemini models and CUSTOM (ADD DISCLAIMER REQUIRING VISION MODELS)
-# [ ] change the new name label to an input so the user can edit the name before renaming
 
 from dotenv import load_dotenv
 import os
@@ -9,7 +8,7 @@ import shutil
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import Button, Label, Static
+from textual.widgets import Button, Label, Static, Input
 
 from tui.settings import Settings
 from tui.setup import SetupPage
@@ -77,11 +76,11 @@ class MediaRenamer(App):
 			if not item:
 				self.notify(f"Could not find item for path: {path}", timeout=3)
 				return
-			new_name_label = item.query_one("#new_file_name", Label)
-			new_name_label.update("...")
+			new_name_label = item.query_one("#new_file_name", Input)
+			new_name_label.value = "..."
 			async with sem:
 				new_name = await get_new_name(path, event.clip_length)
-			new_name_label.update(new_name)
+			new_name_label.value = new_name
 
 		include_videos: bool = self.query_one(Settings).include_videos
 		if not check_ffmpeg() and include_videos:

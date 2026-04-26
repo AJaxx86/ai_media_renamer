@@ -2,7 +2,7 @@ from pathlib import Path
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, ScrollableContainer
-from textual.widgets import Button, Label
+from textual.widgets import Button, Label, Input
 from textual.message import Message
 
 
@@ -10,16 +10,25 @@ class ListItem(Horizontal):
 	old_name: str = ""
 	new_name: str = ""
 
+	DEFAULT_CSS = """
+	ListItem {
+		height: auto;
+		width: auto;
+		min-width: 100%;
+	}
+	ListItem Input {
+		width: 1fr;
+	}
+	"""
+
 	def __init__(self, old_name: str):
 		super().__init__()
 		self.old_name = old_name
 
 	def compose(self) -> ComposeResult:
-		self.styles.height = "auto"
-		self.styles.width = "auto"
 		yield Label(self.old_name)
-		yield Label("->")
-		yield Label(self.new_name, id="new_file_name")
+		yield Label(" -> ")
+		yield Input(self.new_name, id="new_file_name", compact=True)
 
 
 class ImageSection(Vertical):
@@ -53,8 +62,8 @@ class Files(Vertical):
 		img_section = self.query_one("#image_section", Vertical)
 		vid_section = self.query_one("#video_section", Vertical)
 
-		await img_section.query("VerticalScroll").remove()
-		await vid_section.query("VerticalScroll").remove()
+		await img_section.query("ScrollableContainer").remove()
+		await vid_section.query("ScrollableContainer").remove()
 		self.list_item_paths.clear()
 
 		img_names: list[ListItem] = []
