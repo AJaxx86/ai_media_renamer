@@ -13,8 +13,10 @@ from textual.widgets import Button, Label, Static, Input
 from tui.settings import Settings
 from tui.setup import SetupPage
 from tui.files import Files
+from tui.model_config import ModelConfig
 from utils.file_manager import scan_dir, check_ffmpeg
 from utils.api_manager import get_new_name
+from utils.config_manager import get_setting, set_setting
 
 load_dotenv()
 
@@ -26,7 +28,7 @@ class TopBar(Horizontal):
 		spacer.styles.max_width = 8
 		yield spacer
 
-		title = Label("AI Media Renamer PRO X 10+ (Lite)")
+		title = Label("AI Media Renamer PRO X+ 10 (Lite)")
 		title.styles.width = "100%"
 		title.styles.text_align = "center"
 		title.styles.text_style = "bold"
@@ -40,7 +42,7 @@ class TopBar(Horizontal):
 
 
 class MediaRenamer(App):
-	openrouter_key, ollama_port = os.getenv("OPENROUTER_KEY"), os.getenv("OLLAMA_PORT")
+	openrouter_key, ollama_port = get_setting("openrouter_key"), get_setting("ollama_port")
 	image_paths: list[str] = []
 	video_paths: list[str] = []
 
@@ -52,12 +54,15 @@ class MediaRenamer(App):
 				yield Files()
 
 	def on_mount(self) -> None:
-		if not self.openrouter_key and not self.ollama_port:
+		if not self.openrouter_key:
 			self.push_screen(SetupPage())
 
 	def on_button_pressed(self, event: Button.Pressed) -> None:
 		if event.button.id == "back":
 			self.app.push_screen(SetupPage())
+
+	def on_settings_open_model_config(self, event: Settings.OpenModelConfig) -> None:
+		self.app.push_screen(ModelConfig())
 
 	async def on_settings_dir_set(self, event: Settings.DirSet) -> None:
 		self.image_paths, self.video_paths = scan_dir(event.dir, event.allow_images, event.allow_videos)

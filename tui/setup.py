@@ -5,6 +5,8 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Label, Input
 
+from utils.config_manager import get_setting, set_setting
+
 
 class TopBar(Horizontal):
 	def compose(self) -> ComposeResult:
@@ -45,6 +47,15 @@ class Inputs(Vertical):
 
 
 class SetupPage(Screen):
+	current_openrouter_key: str = get_setting("openrouter_key")
+	current_ollama_port: str = str(get_setting("ollama_port"))
+
+	def on_mount(self) -> None:
+		key = self.query_one("#openrouter_key", Input)
+		port = self.query_one("#ollama_port", Input)
+		key.value = self.current_openrouter_key
+		port.value = self.current_ollama_port
+
 	def compose(self) -> ComposeResult:
 		with Vertical():
 			yield TopBar()
@@ -61,6 +72,6 @@ class SetupPage(Screen):
 				self.notify("Please enter a valid key or port.", severity="error")
 				return
 
-			set_key(".env", "OPENROUTER_KEY", key.value)
-			set_key(".env", "OLLAMA_PORT", port.value)
+			set_setting("openrouter_key", key.value)
+			set_setting("ollama_port", port.value)
 			self.app.pop_screen()

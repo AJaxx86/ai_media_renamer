@@ -1,4 +1,7 @@
 {
-    "venvPath": ".",
-    "venv": "venv"
+	"venvPath": ".",
+	"venv": "venv",
+	"reportUnusedCallResult": "none",
+	"reportMissingTypeArgument": "none",
+	"reportImplicitOverride": "none"
 }

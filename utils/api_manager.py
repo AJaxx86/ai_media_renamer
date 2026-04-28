@@ -1,6 +1,7 @@
 from openai import AsyncOpenAI
 from pathlib import Path
 from .file_manager import image_whitelist
+from .config_manager import get_setting
 import subprocess
 import os
 import base64
@@ -9,10 +10,11 @@ import asyncio
 clip_dir: str = "tmp/"
 
 
+# UDPATE THIS TO CHECK FOR CLOUD_ENABLED
 async def get_new_name(file_path: str, target_clip_length: str, extra_context: str = "") -> str:
 	client = AsyncOpenAI(
 		base_url="https://openrouter.ai/api/v1",
-		api_key=os.getenv("OPENROUTER_KEY")
+		api_key=get_setting("openrouter_key")
 	)
 
 	selected_model: str = "google/gemini-3-flash-preview"

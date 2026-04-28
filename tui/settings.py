@@ -72,6 +72,9 @@ class Settings(Vertical):
 		def __init__(self) -> None:
 			super().__init__()
 			self.rename_files = True
+	
+	class OpenModelConfig(Message):
+		pass
 
 	include_images: bool = False
 	include_videos: bool = True
@@ -121,3 +124,6 @@ class Settings(Vertical):
 			else:
 				event.button.label = "Local"
 				event.button.styles.color = "orange"
+		
+		elif event.button.id == "model_config":
+			self.post_message(self.OpenModelConfig())

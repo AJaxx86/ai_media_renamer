@@ -1,0 +1,6 @@
+{
+    "openrouter_key": "",
+    "ollama_port": "11434",
+    "cloud_enabled": false,
+    "cloud_model": "google/gemini-3-flash-preview"
+}
