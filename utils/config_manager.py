@@ -9,6 +9,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
 	"ollama_port": "11434",
 	"cloud_enabled": False,
 	"cloud_model": "google/gemini-3-flash-preview",
+	"local_model": "",
 }
 
 

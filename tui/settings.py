@@ -3,6 +3,8 @@ from textual.containers import Horizontal, Vertical
 from textual.message import Message
 from textual.widgets import Button, Label, Input, TextArea
 
+from utils.config_manager import get_setting, set_setting
+
 
 class ScanDir(Vertical):
 	def compose(self) -> ComposeResult:
@@ -78,7 +80,6 @@ class Settings(Vertical):
 
 	include_images: bool = False
 	include_videos: bool = True
-	cloud_model: bool = True
 
 	def compose(self) -> ComposeResult:
 		yield ScanDir()
@@ -117,8 +118,10 @@ class Settings(Vertical):
 			event.button.label = f"({'X' if self.include_videos else ' '}) Videos"
 
 		elif event.button.id == "model_type":
-			self.cloud_model = not self.cloud_model
-			if self.cloud_model:
+			cloud_enabled: bool = get_setting("cloud_enabled")
+			cloud_enabled = not cloud_enabled
+			set_setting("cloud_enabled", cloud_enabled)
+			if cloud_enabled:
 				event.button.label = "Cloud"
 				event.button.styles.color = "aqua"
 			else:

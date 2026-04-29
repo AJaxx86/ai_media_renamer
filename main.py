@@ -1,6 +1,3 @@
-# TODO
-# [ ] new screen for AI model config, local and cloud with ECO, BALANCED, EXPENSIVE using gemini models and CUSTOM (ADD DISCLAIMER REQUIRING VISION MODELS)
-
 from dotenv import load_dotenv
 import os
 import asyncio
@@ -35,7 +32,7 @@ class TopBar(Horizontal):
 		title.styles.margin = (0, 0, 1, 0)
 		yield title
 
-		back_button = Button("<-", id="back", compact=True)
+		back_button = Button("Setup", id="back", compact=True)
 		back_button.styles.dock = "right"
 		back_button.styles.max_width = 8
 		yield back_button
