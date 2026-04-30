@@ -1,7 +1,0 @@
-{
-    "openrouter_key": "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",
-    "ollama_port": "11434",
-    "cloud_enabled": true,
-    "cloud_model": "google/gemini-3.1-flash-lite-preview",
-    "local_model": ""
-}
