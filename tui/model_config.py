@@ -15,6 +15,8 @@ def change_button_colour(model: str) -> None:
 def initialise_cloud_model_buttons() -> None:
 	model: str = get_setting("cloud_model")
 	match model:
+		case Models.FREE:
+			change_button_colour("free")
 		case Models.ECO:
 			change_button_colour("eco")
 		case Models.BALANCED:
@@ -26,6 +28,7 @@ def initialise_cloud_model_buttons() -> None:
 
 
 class Models:
+	FREE: str = "google/gemma-4-31b-it:free"
 	ECO: str = "google/gemini-3.1-flash-lite-preview"
 	BALANCED: str = "google/gemini-3-flash-preview"
 	EXPENSIVE: str = "google/gemini-3.1-pro-preview"
@@ -35,6 +38,7 @@ class CloudModelConfig(Vertical):
 	def compose(self) -> ComposeResult:
 		self.styles.padding = (1, 1, 2, 1)
 
+		select_free = Button("FREE", id="cloud_free")
 		select_eco = Button("ECO", id="cloud_eco")
 		select_bal = Button("BALANCED", id="cloud_bal")
 		select_exp = Button("EXPENSIVE", id="cloud_exp")
@@ -42,6 +46,7 @@ class CloudModelConfig(Vertical):
 		cloud_model_input = Input(placeholder="qwen/qwen3-vl-235b-a22b-thinking", id="custom_model")
 		cloud_model_input.styles.width = 80
 
+		cloud_model_buttons["free"] = select_free
 		cloud_model_buttons["eco"] = select_eco
 		cloud_model_buttons["bal"] = select_bal
 		cloud_model_buttons["exp"] = select_exp
@@ -51,6 +56,7 @@ class CloudModelConfig(Vertical):
 		yield Label("Cloud Config")
 		with Horizontal() as h:
 			h.styles.height = "auto"
+			yield select_free
 			yield select_eco
 			yield select_bal
 			yield select_exp
@@ -79,7 +85,11 @@ class ModelConfig(Screen):
 			yield Button("Back", id="close_config")
 
 	def on_button_pressed(self, event: Button.Pressed) -> None:
-		if event.button.id == "cloud_eco":
+		if event.button.id == "cloud_free":
+			set_setting("cloud_model", Models.FREE)
+			change_button_colour("free")
+			self.notify(f"Cloud model set to {Models.FREE}")
+		elif event.button.id == "cloud_eco":
 			set_setting("cloud_model", Models.ECO)
 			change_button_colour("eco")
 			self.notify(f"Cloud model set to {Models.ECO}")

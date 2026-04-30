@@ -17,10 +17,11 @@ async def get_new_name(file_path: str, target_clip_length: str, extra_context: s
 		api_key=get_setting("openrouter_key")
 	)
 
-	selected_model: str = "google/gemini-3-flash-preview"
+	selected_model: str = get_setting("cloud_model")
 	file_name: str = Path(file_path).stem
 	file_type: str = Path(file_path).suffix
-	is_image: bool = file_type.lstrip(".") in image_whitelist
+	mime_type: str = file_type.lstrip(".")
+	is_image: bool = mime_type in image_whitelist
 
 	system_prompt: str = f"""
 	Rename this {'image' if is_image else 'video'}. The current name is {file_name}.
@@ -47,7 +48,7 @@ async def get_new_name(file_path: str, target_clip_length: str, extra_context: s
 		messages.append({
 			"role": "user",
 			"content": [
-				{"type": "image_url", "image_url": {"url": f"data:image/{file_type};base64,{encoded}"}}
+				{"type": "image_url", "image_url": {"url": f"data:image/{mime_type};base64,{encoded}"}}
 			]
 		})
 	else:
@@ -58,7 +59,7 @@ async def get_new_name(file_path: str, target_clip_length: str, extra_context: s
 		messages.append({
 			"role": "user",
 			"content": [
-				{"type": "video_url", "video_url": {"url": f"data:video/{file_type};base64,{encoded}"}}
+				{"type": "video_url", "video_url": {"url": f"data:video/{mime_type};base64,{encoded}"}}
 			]
 		})
 
@@ -66,6 +67,12 @@ async def get_new_name(file_path: str, target_clip_length: str, extra_context: s
 		model=selected_model,
 		messages=messages
 	)
+
+	if response.choices is None:
+		error_detail = getattr(response, "error", None)
+		if isinstance(error_detail, dict):
+			return f"API Error: {error_detail.get('message', 'Unknown error')}"
+		return "API Error: Unknown error"
 
 	return (response.choices[0].message.content or "").strip() + file_type
 

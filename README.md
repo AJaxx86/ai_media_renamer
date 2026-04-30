@@ -7,7 +7,10 @@ Intended for use cases where you'd rather eat rocks than rename hundreds of file
 
 - Python 3.10 or newer
 - FFmpeg for video support
-- OpenRouter API key, or Ollama running locally
+- OpenRouter API key, or Ollama running locally (LOCAL MODE NOT IMPLEMENTED YET)
+
+Go to `openrouter.ai` and create an account, then you can create an API key to use with the tool.
+You need to add credits to use the `ECO`/`BALANCED`/`EXPENSIVE` modes, but `FREE` can be used without issue.
 
 ## Windows
 

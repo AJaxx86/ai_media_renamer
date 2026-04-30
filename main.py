@@ -11,7 +11,7 @@ from tui.settings import Settings
 from tui.setup import SetupPage
 from tui.files import Files
 from tui.model_config import ModelConfig
-from utils.file_manager import scan_dir, check_ffmpeg
+from utils.file_manager import scan_dir, check_ffmpeg, rename_files
 from utils.api_manager import get_new_name
 from utils.config_manager import get_setting, set_setting
 
@@ -43,6 +43,8 @@ class MediaRenamer(App):
 	image_paths: list[str] = []
 	video_paths: list[str] = []
 
+	new_name_dict: dict[str, str] = {}
+
 	def compose(self) -> ComposeResult:
 		with Vertical():
 			yield TopBar()
@@ -62,6 +64,10 @@ class MediaRenamer(App):
 		self.app.push_screen(ModelConfig())
 
 	async def on_settings_dir_set(self, event: Settings.DirSet) -> None:
+		self.new_name_dict.clear()
+		self.image_paths.clear()
+		self.video_paths.clear()
+
 		self.image_paths, self.video_paths = scan_dir(event.dir, event.allow_images, event.allow_videos)
 		if len(self.image_paths) == 0 and len(self.video_paths) == 0:
 			self.notify("No images or videos found in the selected directory.", timeout=3, severity="warning")
@@ -69,10 +75,6 @@ class MediaRenamer(App):
 		await self.query_one(Files).set_files(self.image_paths, self.video_paths)
 
 	async def on_settings_get_new_names(self, event: Settings.GetNewNames) -> None:
-		shutil.rmtree("tmp", ignore_errors=True)
-		os.makedirs("tmp", exist_ok=True)
-		sem = asyncio.Semaphore(2)
-
 		async def fetch_and_update(path: str) -> None:
 			item = self.query_one(Files).list_item_paths.get(path)
 			if not item:
@@ -83,6 +85,19 @@ class MediaRenamer(App):
 			async with sem:
 				new_name = await get_new_name(path, event.clip_length)
 			new_name_label.value = new_name
+			self.new_name_dict[path] = os.path.join(os.path.dirname(path), new_name)
+
+		if not get_setting("cloud_enabled"):
+			self.notify("Sorry, local mode has not been implemented yet.", severity="warning")
+			return
+
+		if not get_setting("openrouter_key") and get_setting("cloud_enabled"):
+			self.notify("Please set your OpenRouter API key on the Setup page (top right).", severity="warning")
+			return
+
+		shutil.rmtree("tmp", ignore_errors=True)
+		os.makedirs("tmp", exist_ok=True)
+		sem = asyncio.Semaphore(2)
 
 		include_videos: bool = self.query_one(Settings).include_videos
 		if not check_ffmpeg() and include_videos:
@@ -93,7 +108,9 @@ class MediaRenamer(App):
 		await asyncio.gather(*[fetch_and_update(path) for path in self.image_paths + self.video_paths])
 
 	async def on_settings_rename_files(self, event: Settings.RenameFiles) -> None:
-		pass
+		self.app.notify("Renaming files...", timeout=3)
+		rename_files(self.new_name_dict)
+		self.app.notify("Files renamed successfully!", timeout=3)
 
 
 if __name__ == "__main__":

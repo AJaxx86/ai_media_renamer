@@ -7,7 +7,7 @@ CONFIG_PATH = Path("config.json")
 DEFAULT_CONFIG: dict[str, Any] = {
 	"openrouter_key": "",
 	"ollama_port": "11434",
-	"cloud_enabled": False,
+	"cloud_enabled": True,
 	"cloud_model": "google/gemini-3-flash-preview",
 	"local_model": "",
 }
