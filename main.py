@@ -1,3 +1,7 @@
+# TODO
+# the most up-to-date name isn't retrieved directly from the inputs
+# extra context isn't being considered/sent to the model correctly
+
 from dotenv import load_dotenv
 import os
 import asyncio
