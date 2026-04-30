@@ -10,7 +10,7 @@ Intended for use cases where you'd rather eat rocks than rename hundreds of file
 - OpenRouter API key, or Ollama running locally (LOCAL MODE NOT IMPLEMENTED YET)
 
 Go to `openrouter.ai` and create an account, then you can create an API key to use with the tool.
-You need to add credits to use the `ECO`/`BALANCED`/`EXPENSIVE` modes, but `FREE` can be used without issue.
+You need to add credits to use the `ECO`/`BALANCED`/`EXPENSIVE` modes. `FREE` uses `google/gemma-4-31b-it:free` and can work, however it can get rate-limited and cause the program to crash.
 
 ## Windows
 
