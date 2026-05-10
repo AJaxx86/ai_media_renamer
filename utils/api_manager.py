@@ -27,21 +27,17 @@ async def get_new_name(file_path: str, target_clip_length: str, extra_context: s
 	Rename this {'image' if is_image else 'video'}. The current name is {file_name}.
 	Respond with nothing but the new name, that means no explanation, no file extension, etc.
 	Do not use a full stop at the end of the name.
-	"""
-	messages: list = [{
-		"role": "system",
-		"content": [
-			{"type": "text", "text": system_prompt}
-		]
-	}]
 
-	if extra_context:
-		messages.append({
-			"role": "user",
-			"content": [
-				{"type": "text", "text": extra_context}
-			]
-		})
+	If the user has provided extra guidelines/context, it will appear here:
+	{"N/A" if not extra_context else extra_context}
+	"""
+
+	messages: list[dict] = [
+		{
+			"role": "system",
+			"content": system_prompt
+		}
+	]
 
 	if is_image:
 		encoded = await asyncio.to_thread(encode_base64, file_path)

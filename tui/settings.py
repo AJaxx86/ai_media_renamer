@@ -66,15 +66,14 @@ class Settings(Vertical):
 			self.allow_videos = allow_videos
 
 	class GetNewNames(Message):
-		def __init__(self, target_clip_length: str) -> None:
+		def __init__(self, target_clip_length: str, prompt: str = "") -> None:
 			super().__init__()
 			self.clip_length = target_clip_length
+			self.user_prompt = prompt
 
 	class RenameFiles(Message):
-		def __init__(self) -> None:
-			super().__init__()
-			self.rename_files = True
-	
+		pass
+
 	class OpenModelConfig(Message):
 		pass
 
@@ -104,7 +103,8 @@ class Settings(Vertical):
 
 		if event.button.id == "start_analyses":
 			target_clip_length = self.query_one("#clip_length", Input).value
-			self.post_message(self.GetNewNames(target_clip_length if target_clip_length else "60"))
+			user_prompt: str = self.query_one("#user_prompt", TextArea).text
+			self.post_message(self.GetNewNames(target_clip_length if target_clip_length else "60", user_prompt))
 
 		if event.button.id == "start_rename":
 			self.post_message(self.RenameFiles())
@@ -127,6 +127,6 @@ class Settings(Vertical):
 			else:
 				event.button.label = "Local"
 				event.button.styles.color = "orange"
-		
+
 		elif event.button.id == "model_config":
 			self.post_message(self.OpenModelConfig())

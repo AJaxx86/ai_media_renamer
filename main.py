@@ -1,6 +1,5 @@
 # TODO
-# the most up-to-date name isn't retrieved directly from the inputs
-# extra context isn't being considered/sent to the model correctly
+# still a bug where renaming files, then changing a file name and renaming again, causes a crash
 
 from dotenv import load_dotenv
 import os
@@ -17,7 +16,7 @@ from tui.files import Files
 from tui.model_config import ModelConfig
 from utils.file_manager import scan_dir, check_ffmpeg, rename_files
 from utils.api_manager import get_new_name
-from utils.config_manager import get_setting, set_setting
+from utils.config_manager import get_setting
 
 load_dotenv()
 
@@ -87,7 +86,7 @@ class MediaRenamer(App):
 			new_name_label = item.query_one("#new_file_name", Input)
 			new_name_label.value = "..."
 			async with sem:
-				new_name = await get_new_name(path, event.clip_length)
+				new_name = await get_new_name(path, event.clip_length, event.user_prompt)
 			new_name_label.value = new_name
 			self.new_name_dict[path] = os.path.join(os.path.dirname(path), new_name)
 
@@ -113,7 +112,16 @@ class MediaRenamer(App):
 
 	async def on_settings_rename_files(self, event: Settings.RenameFiles) -> None:
 		self.app.notify("Renaming files...", timeout=3)
-		rename_files(self.new_name_dict)
+		files_widget = self.query_one(Files)
+		current_name_dict: dict[str, str] = {}
+
+		for path, item in files_widget.list_item_paths.items():
+			input_widget = item.query_one("#new_file_name", Input)
+			new_name = input_widget.value.strip()
+			if new_name:
+				current_name_dict[path] = os.path.join(os.path.dirname(path), new_name)
+
+		rename_files(current_name_dict)
 		self.app.notify("Files renamed successfully!", timeout=3)
 
 
